@@ -3,9 +3,63 @@ from nltk.tokenize import sent_tokenize
 import os
 
 class SentenceSplitter:
+    def __init__(self):
+        # NLTK 데이터 다운로드 (처음 실행시에만 필요)
+        try:
+            nltk.data.find('tokenizers/punkt')
+        except LookupError:
+            nltk.download('punkt')
+        
+        self.MIN_SENTENCE_LENGTH = 5  # 최소 문장 길이 (불충족시 삭제)
+        self.MAX_SHORT_SENTENCE_LENGTH = 10  # 짧은 문장으로 간주할 최대 길이 (10글자 이하 문장 병합)
+
+    def process_sentences(self, sentences):
+        """문장들을 처리하여 짧은 문장을 처리"""
+        processed_sentences = []
+        i = 0
+        
+        while i < len(sentences):
+            current_sentence = sentences[i].strip()
+            
+            # 최소 길이 미만인 문장은 삭제
+            if len(current_sentence) < self.MIN_SENTENCE_LENGTH:
+                i += 1
+                continue
+                
+            # 짧은 문장 처리
+            if self.MIN_SENTENCE_LENGTH <= len(current_sentence) <= self.MAX_SHORT_SENTENCE_LENGTH:
+                # 다음 문장이 있는 경우
+                if i + 1 < len(sentences):
+                    next_sentence = sentences[i + 1].strip()
+                    # 이전 문장이 있는 경우
+                    if i > 0:
+                        prev_sentence = processed_sentences[-1]
+                        # 이전 문장이 더 짧으면 이전 문장과 병합
+                        if len(prev_sentence) < len(next_sentence):
+                            processed_sentences[-1] = f"{prev_sentence} {current_sentence}"
+                            i += 1
+                            continue
+                    # 다음 문장과 병합
+                    processed_sentences.append(f"{current_sentence} {next_sentence}")
+                    i += 2
+                    continue
+                # 다음 문장이 없는 경우
+                if i > 0:
+                    prev_sentence = processed_sentences[-1]
+                    processed_sentences[-1] = f"{prev_sentence} {current_sentence}"
+                    i += 1
+                    continue
+            
+            # 일반 문장 처리
+            processed_sentences.append(current_sentence)
+            i += 1
+            
+        return processed_sentences
+
     def split_sentences(self, text):
-        """텍스트를 문장 단위로 분리"""
-        return sent_tokenize(text)
+        """텍스트를 문장 단위로 분리하고 처리"""
+        sentences = sent_tokenize(text)
+        return self.process_sentences(sentences)
 
     def process_file(self, input_file):
         """파일을 읽어서 문장 단위로 분리"""
