@@ -3,14 +3,6 @@ from nltk.tokenize import sent_tokenize
 import os
 
 class SentenceSplitter:
-    def __init__(self):
-        # NLTK 데이터 다운로드 (처음 실행시에만 필요)
-        try:
-            nltk.data.find('tokenizers/punkt')
-        except LookupError:
-            nltk.download('punkt')
-            nltk.download('punkt_tab')
-
     def split_sentences(self, text):
         """텍스트를 문장 단위로 분리"""
         return sent_tokenize(text)
@@ -25,7 +17,7 @@ def main():
     splitter = SentenceSplitter()
     
     # assets 폴더 생성
-    assets_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), './text-preprocessing/assets')
+    assets_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), '../assets')
     os.makedirs(assets_dir, exist_ok=True)
     
     txt_files = [f for f in os.listdir(assets_dir) if f.endswith('.txt')]
