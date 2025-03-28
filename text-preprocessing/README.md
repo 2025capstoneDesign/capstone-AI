@@ -20,7 +20,7 @@ DATA_DIR = "text-preprocessing/data"  # 처리된 결과가 저장되는 디렉�
 
 # 문장 길이 설정
 MIN_SENTENCE_LENGTH = 5  # 5자 미만의 문장은 삭제
-MAX_SENTENCE_LENGTH = 1000  # 문장 병합 시 최대 길이
+MAX_SENTENCE_LENGTH = 600  # 문장 병합 시 최대 길이
 
 # OpenAI API 설정
 OPENAI_MODEL = "gpt-3.5-turbo"  # 사용할 OpenAI 모델
@@ -55,8 +55,8 @@ OPENAI_API_KEY=your_api_key_here
 
 ## 성능 및 권장사항
 
-- 문장 개수는 API 비용에 직접적인 영향을 미치므로, 100개 이하로 유지하는 것을 권장합니다.
-- 현재 `main.py`의 설정은 테스트 결과 가장 적절한 것으로 확인되었습니다.
+- 문장 개수는 API 비용에 직접적인 영향을 미칩니다. 따라서 전처리 후 문장 개수가 50개 이하로 유지하는 것을 권장합니다.
+- 현재 `main.py`의 설정은 테스트 결과 가장 적절한 것으로 확인하였습니다. (MAX_SENTENCE_LENGTH = 600)
 
 ## 테스트
 
@@ -68,9 +68,3 @@ OPENAI_API_KEY=your_api_key_here
 
 `testData`를 사용하여 여러 문장에 대한 테스트가 가능합니다.
 이 테스트는 실제 전처리 작업을 수행하지 않으며, 문장 분리 및 병합 로직만 테스트합니다.
-
-## 주의사항
-
-- API 사용량에 따른 비용이 발생할 수 있습니다.
-- 처리 시간은 문장의 수와 길이에 따라 달라질 수 있습니다.
-- 원본 파일은 반드시 UTF-8 인코딩이어야 합니다.
