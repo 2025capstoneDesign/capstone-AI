@@ -11,7 +11,8 @@ class SentenceSplitter:
             nltk.download('punkt')
         
         self.MIN_SENTENCE_LENGTH = 5  # 최소 문장 길이 (불충족시 삭제)
-        self.MAX_SHORT_SENTENCE_LENGTH = 10  # 짧은 문장으로 간주할 최대 길이 (10글자 이하 문장 병합)
+        self.MAX_SHORT_SENTENCE_LENGTH = 100  # 짧은 문장으로 간주할 최대 길이 (30글자 이하 문장 병합)
+        self.MAX_SENTENCE_LENGTH = 400  # 문장 병합 시 최대 길이 제한
 
     def process_sentences(self, sentences):
         """문장들을 처리하여 짧은 문장을 처리"""
@@ -21,36 +22,41 @@ class SentenceSplitter:
         while i < len(sentences):
             current_sentence = sentences[i].strip()
             
-            # 최소 길이 미만인 문장은 삭제
+            # 1. MIN_SENTENCE_LENGTH 미만인 문장은 무조건 삭제
             if len(current_sentence) < self.MIN_SENTENCE_LENGTH:
                 i += 1
                 continue
+            
+            # 2. MAX_SHORT_SENTENCE_LENGTH 이하인 문장은 무조건 병합 시도
+            if len(current_sentence) <= self.MAX_SHORT_SENTENCE_LENGTH:
+                merged = False
                 
-            # 짧은 문장 처리
-            if self.MIN_SENTENCE_LENGTH <= len(current_sentence) <= self.MAX_SHORT_SENTENCE_LENGTH:
                 # 다음 문장이 있는 경우
                 if i + 1 < len(sentences):
                     next_sentence = sentences[i + 1].strip()
-                    # 이전 문장이 있는 경우
-                    if i > 0:
-                        prev_sentence = processed_sentences[-1]
-                        # 이전 문장이 더 짧으면 이전 문장과 병합
-                        if len(prev_sentence) < len(next_sentence):
-                            processed_sentences[-1] = f"{prev_sentence} {current_sentence}"
-                            i += 1
-                            continue
-                    # 다음 문장과 병합
-                    processed_sentences.append(f"{current_sentence} {next_sentence}")
-                    i += 2
-                    continue
-                # 다음 문장이 없는 경우
-                if i > 0:
+                    # 다음 문장과 병합 시도
+                    if len(current_sentence) + len(next_sentence) <= self.MAX_SENTENCE_LENGTH:
+                        current_sentence = f"{current_sentence} {next_sentence}"
+                        i += 2
+                        merged = True
+                
+                # 이전 문장이 있는 경우
+                if not merged and i > 0 and processed_sentences:
                     prev_sentence = processed_sentences[-1]
-                    processed_sentences[-1] = f"{prev_sentence} {current_sentence}"
-                    i += 1
-                    continue
+                    # 이전 문장과 병합 시도
+                    if len(prev_sentence) + len(current_sentence) <= self.MAX_SENTENCE_LENGTH:
+                        processed_sentences[-1] = f"{prev_sentence} {current_sentence}"
+                        i += 1
+                        merged = True
+                
+                # 병합이 성공했다면, 병합된 문장이 여전히 짧은지 확인하고 계속 처리
+                if merged:
+                    # 병합된 문장이 여전히 짧다면 다시 처리
+                    if len(current_sentence) <= self.MAX_SHORT_SENTENCE_LENGTH:
+                        i -= 1  # 현재 문장을 다시 처리하기 위해 인덱스 조정
+                        continue
             
-            # 일반 문장 처리
+            # 3. 일반 문장 처리
             processed_sentences.append(current_sentence)
             i += 1
             
