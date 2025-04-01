@@ -17,3 +17,10 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+
+#data
+text-preprocessing/data/*
+
+# macOS system files
+.DS_Store
+**/.DS_Store
